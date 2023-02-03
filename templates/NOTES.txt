@@ -1,0 +1,42 @@
+·   __  ___                    __                     __         
+   /  |/  /   __  __  _____   / /_   ____ _   _____  / /_   _____
+  / /|_/ /   / / / / / ___/  / __ \ / __ `/  / ___/ / __/  / ___/
+ / /  / /   / /_/ / / /__   / / / // /_/ /  / /    / /_   (__  ) 
+/_/  /_/    \__, /  \___/  /_/ /_/ \__,_/  /_/     \__/  /____/  
+           /____/                                                
+
+You have successfully installed the official {{ .Chart.Name }} Helm chart     
+
+### Installation info
+
+  - Kubernetes namespace: {{ .Release.Namespace }}
+  - Helm release name:    {{ .Release.Name }}
+  - Helm chart version:   {{ .Chart.Version }}
+  - {{ .Chart.Name }} version:   {{ .Chart.AppVersion }}
+  - Hub pod packages:     See https://gitlab.bococ.com/datamap-backend/mycharts/-/blob/{{ include "mychart-version-to-git-ref" .Chart.Version }}/requirements.txt
+  - Issue tracking:       https://gitlab.bococ.com/datamap-backend/{{ .Chart.Name }}/-/issues
+
+### Post-installation checklist
+
+  - Verify that created Pods enter a Running state:
+
+      kubectl --namespace={{ .Release.Namespace }} get pod
+
+    If a pod is stuck with a Pending or ContainerCreating status, diagnose with:
+
+      kubectl --namespace={{ .Release.Namespace }} describe pod <name of pod>
+
+    If a pod keeps restarting, diagnose with:
+
+      kubectl --namespace={{ .Release.Namespace }} logs --previous <name of pod>
+  {{- println }}
+
+  {{- if eq .Values.service.type "LoadBalancer" }}
+  - Verify an external IP is provided for the k8s Service {{ .Values.server.name }}.
+
+      kubectl --namespace={{ .Release.Namespace }} get service {{ .Values.server.name }}
+
+    If the external ip remains <pending>, diagnose with:
+
+      kubectl --namespace={{ .Release.Namespace }} describe service {{ .Values.server.name }}
+  {{- end }}

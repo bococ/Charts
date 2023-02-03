@@ -1,0 +1,25 @@
+{{- if eq .Values.storage.type "dynamic" -}}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "mychart-pvc.fullname" . }}
+  labels:
+    {{- include "mychart.labels" . | indent 4 }}
+  {{- with .Values.storage.pvc.annotations }}
+  annotations:
+    {{- . | toYaml | nindent 4 }}
+  {{- end }}
+spec:
+  {{- with .Values.storage.pvc.selector }}
+  selector:
+    {{- . | toYaml | nindent 4 }}
+  {{- end }}
+  {{- if typeIs "string" .Values.storage.pvc.storageClassName }}
+  storageClassName: {{ .Values.storage.pvc.storageClassName | quote }}
+  {{- end }}
+  accessModes:
+    {{- .Values.storage.pvc.accessModes | toYaml | nindent 4 }}
+  resources:
+    requests:
+      storage: {{ .Values.storage.pvc.storage | quote }}
+{{- end }}

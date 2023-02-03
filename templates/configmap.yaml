@@ -1,0 +1,20 @@
+{{- if eq (default "False" $.Values.sidecar.type) "True" }}
+# filebeat 配置文件configmap
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ include "mychart.fullname" . }}-config
+data:
+  filebeat.yml: |
+    filebeat.inputs:
+    - type: log
+      enabled: true
+      paths:
+        - /log/access.log
+      fields:
+        tag: {{ include "mychart.fullname" . }}.{{ .Values.env }}
+      fields_under_root: true
+    output.logstash:
+      # The Logstash hosts
+      hosts: ["vpc_internal.bococ.cn:5008"]
+{{- end }}

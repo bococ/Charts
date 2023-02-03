@@ -1,0 +1,105 @@
+# Default values for mychart.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# onpremises prod staging
+env: prod
+
+image:
+  name: registry-vpc.cn-hangzhou.aliyuncs.com/mdt/mycharts
+  tag: v1.0.1
+
+imagePullSecrets: [{name: "docker.bococ.com"}]
+
+server:
+  ##
+  replicaCount: 1
+  env:
+   {}
+   # foo: bar
+
+additionalLabels:
+  {}
+  # foo: bar
+
+additionalAnnotations:
+  {}
+  # foo: bar
+
+podAnnotations:
+  {}
+podLabels:
+  {}
+
+extraArgs: 
+  - -c
+  - gunicorn "app:app" >> /log/access.log 2>&1
+
+
+resources: {}
+  # requests:
+  #   cpu: "3.8"
+  #   memory: 7.8Gi
+  # limits:
+  #   cpu: "3.8"
+  #   memory: 7.8Gi
+
+
+# Extra volumes and volume mounts for the deployment. Optional.
+volumes:
+  server:
+    extraVolumes: 
+      {}
+    extraVolumeMounts:
+      {}
+
+  filebeat:
+    extraVolumes: []
+    extraVolumeMounts: []
+
+  logrotate:
+    extraVolumes: []
+    extraVolumeMounts: []
+
+
+storage:
+  type: dynamic
+  pvc:
+      annotations: {}
+      selector: {}
+      accessModes:
+        - ReadWriteMany
+      storage: 1Gi
+      subPath:
+      storageClassName:
+
+
+service:
+  type: LoadBalancer
+  # 映射容器外的端口
+  port: 18600
+  # 容器内的端口
+  targetPort: 8890
+  annotations:
+    {}
+    # foo: bar
+
+
+sidecar:
+  # sidecar 默认关闭 type为"Ture"时开启
+  type: {}
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:7.9.2
+  logrotate:
+    image: registry.cn-hangzhou.aliyuncs.com/mdt/logrotate:v1.0.0
+
+
+hpa:
+  # 最小副本 最大副本
+  minReplicaCount: 1
+  maxReplicaCount: 20
+  kedareplicaCount: 2
+  memory:
+    averageUtilization: 90
+  cpu:
+    averageUtilization: 50
