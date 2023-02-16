@@ -86,12 +86,10 @@ service:
 
 
 sidecar:
-  # sidecar 默认关闭 type为"Ture"时开启
+  # sidecar 默认关闭 type为"True"时开启
   type: {}
-  filebeat:
-    image: docker.elastic.co/beats/filebeat:7.9.2
-  logrotate:
-    image: registry.cn-hangzhou.aliyuncs.com/mdt/logrotate:v1.0.0
+  containers: {}
+
 
 
 hpa:
