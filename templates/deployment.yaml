@@ -57,7 +57,7 @@ spec:
           env:
           {{- range $k, $v := .Values.server.env }}
           - name: {{ $k }}
-            value: {{ $v }}
+            value: {{ $v | quote }}
           {{- end }}
           ports:
           - name: {{ template "mychart.fullname" . }}
@@ -66,70 +66,11 @@ spec:
           {{- if .Values.volumes.server.extraVolumeMounts }}
           {{- toYaml .Values.volumes.server.extraVolumeMounts | nindent 10 }}
           {{- end }}
-          - name: log
-            mountPath: /log
-          - name: tz
-            mountPath: /etc/localtime
-            subPath: Shanghai
-          - name: global-config
-            mountPath: "/gunicorn.conf.py"
-            readOnly: true
-            subPath: uvicorn-monitor-gunicorn.conf.py
         {{- if eq (default "False" $.Values.sidecar.type) "True" }}
-        - name: filebeat
-          image: {{ .Values.sidecar.filebeat.image }}
-          command: ["/bin/sh"]
-          args:
-            - -c
-            - filebeat -e -strict.perms=false
-          resources:
-            limits:
-              cpu: "0.1"
-              memory: 0.1Gi
-          volumeMounts:
-          - name: log
-            mountPath: /log
-          - name: config #挂载的是filebeat的配置文件
-            mountPath: "/usr/share/filebeat/filebeat.yml"
-            readOnly: true
-            subPath: filebeat.yml
-        - name: logrotate
-          image: {{ .Values.sidecar.logrotate.image }}
-          resources:
-            limits:
-              cpu: "0.1"
-              memory: 0.1Gi
-          env:
-          - name: CRON_SCHEDULE
-            value: "* * * * *"
-          - name: LOGROTATE_SIZE
-            value: '10M'
-          - name: LOGROTATE_ROTATE
-            value: '1'
-          - name: LOGROTATE_PATTERN
-            value: /log/access.log
-          volumeMounts:
-          - name: log
-            mountPath: /log
+        {{- toYaml .Values.sidecar.containers | nindent 8 }}
         {{- end }} 
       volumes:
       {{- if .Values.volumes.server.extraVolumes }}
       {{- toYaml .Values.volumes.server.extraVolumes | nindent 6 }}
       {{- end }}
-        # pod日志收集目录
-      - name: log
-        emptyDir: {}
-      - name: config
-        configMap:
-          name:  {{ template "mychart.fullname" . }}-config
-      - name: tz
-        configMap:
-          name: tz
-      - name: global-config
-        configMap:
-          name: global-config
-      # 容器crash或着livenessProbe探测失败后重启容器。
-      # Always: 只要container退出就重新启动
-      # OnFailure: 当container非正常退出后重新启动
-      # Never: 从不进行重新启动
       restartPolicy: Always
