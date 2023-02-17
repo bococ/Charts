@@ -53,14 +53,6 @@ volumes:
     extraVolumeMounts:
       {}
 
-  filebeat:
-    extraVolumes: []
-    extraVolumeMounts: []
-
-  logrotate:
-    extraVolumes: []
-    extraVolumeMounts: []
-
 
 storage:
   type: dynamic
